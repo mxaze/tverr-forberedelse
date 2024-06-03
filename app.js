@@ -48,6 +48,7 @@ const pageroutes = {
   },
 };
 
+// auto gets pages from page array
 app.get("/:page", (req, res) => {
   const page = req.params.page;
   pageroutes[page](req, res);
