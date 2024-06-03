@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "cls && nodemon app.js",
-    "fix": "npm i nodemon && npm i express && npm i prisma && npm i @prisma/client && npm i bcrypt && npm i cookie-parser"
+    "fix": "npm i nodemon && npm i express && npm i prisma && npm i @prisma/client && npm i bcrypt && npm i cookie-parser && npm i path"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "crypto": "^1.0.1",
     "express": "^4.19.2",
     "node": "^22.0.0",
-    "nodemon": "^3.1.2"
+    "nodemon": "^3.1.2",
+    "path": "^0.12.7"
   }
 }

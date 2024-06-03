@@ -1,6 +1,6 @@
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
+    url      = "postgresql://postgres:Passord01@localhost:5432/"
 }
 
 generator client {
@@ -9,29 +9,37 @@ generator client {
 }
 
 model Users {
-    id        Int          @id @default(autoincrement())
-    firstname String
-    lastname  String
-    email     String
+    id        Int              @id @default(autoincrement())
     role      Role
-    createdAt DateTime     @default(now())
-    personal  ContactInfo?
-
-    token String @unique @default(cuid())
+    info      UserInformation?
+    articles  Article?
+    createdAt DateTime         @default(now())
+    token     String           @unique @default(cuid())
 }
 
-model ContactInfo {
+model UserInformation {
     id        Int    @id @default(autoincrement())
-    phone     String
-    address   String
+    firstname String
+    lastname  String
+    email     String @unique
+    password  String
     userID    Int    @unique
     user      Users  @relation(fields: [userID], references: [id])
 }
 
+model Article {
+    id        Int      @id @default(autoincrement())
+    title     String
+    content   String
+    userID    Int      @unique
+    author    Users    @relation(fields: [userID], references: [id])
+    createdAt DateTime @default(now())
+}
+
 enum Role {
-    STUDENT
-    TEACHER
     ADMIN
-    ENVIRONMENTWORKER
-    ITCOWORKER
+    SALES
+    MONTEUR
+    CUSTOMER
+    GUEST
 }

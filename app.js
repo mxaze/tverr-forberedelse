@@ -4,13 +4,18 @@ const app = express();
 const prisma = new PrismaClient();
 const cookieparser = require("cookie-parser");
 const crypto = require("crypto");
+const { join } = require("path");
 
-app.use(express.json()); 
+app.use(express.json());
 app.use(cookieparser());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
-app.post("/api/login", async (req, res) => {
+// does so that you can access the pages folder iwth pages and css folder with css
+app.use(express.static(join(__dirname, "css")));
+app.use(express.static(join(__dirname, "pages")));
+
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   const userData = await prisma.users.findFirst({
@@ -21,22 +26,11 @@ app.post("/api/login", async (req, res) => {
   });
 
   if (userData) {
-    switch (userData.role === Role.ADMIN) {
-      case true:
-        res.cookie("token", userData.token);
-        res.redirect("/admin");
-        break;
-      case false:
-        res.cookie("token", userData.token);
-        res.redirect("/welcome");
-        break;
-    }
+    res.cookie("token", userData.token);
+    const role = userData.role;
+    res.redirect(`/${role}`);
   } else {
     res.redirect("/");
-  }
-
-  if (userData) {
-    console.log(userData.firstname + " " + "has been created");
   }
 });
 
@@ -45,9 +39,19 @@ function sha256(message) {
   return crypto.createHash("sha256").update(message).digest("hex").toString();
 }
 
-// does so that you can access the pages folder iwth pages and css folder with css
-app.use(express.static(join(__dirname, "css")));
-app.use(express.static(join(__dirname, "pages")));
+const pageroutes = {
+  admin: (req, res) => {
+    res.sendFile(__dirname + "/pages/admin/index.html");
+  },
+  login: (req, res) => {
+    res.sendFile(__dirname + "/pages/login.html");
+  },
+};
+
+app.get("/:page", (req, res) => {
+  const page = req.params.page;
+  pageroutes[page](req, res);
+});
 
 // sets up port
 app.listen(3000, () => {
