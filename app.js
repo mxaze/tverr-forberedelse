@@ -34,24 +34,79 @@ app.post("/login", async (req, res) => {
   }
 });
 
+async function createAdmin() {
+  const admin = await prisma.users.create({
+    data: {
+      firstname: "admin",
+      lastname: "admin",
+      email: "admin@test.com",
+      password: sha256("Passord01"),
+      role: Role.ADMIN,
+      articles: {
+        create: {
+          title: "Hello world",
+          content: "This is a test article",
+        },
+      },
+    },
+  });
+
+  console.log(`${admin.firstname} has been created`);
+}
+
+async function createUsers() {
+  const sales = await prisma.users.create({
+    data: {
+      firstname: "Saul",
+      lastname: "Goodman",
+      email: "saul@test.com",
+      password: sha256("Passord01"),
+      role: Role.SALES,
+    },
+  });
+
+  const monteur = await prisma.users.create({
+    data: {
+      firstname: "Jesse",
+      lastname: "Pinkman",
+      email: "jesse@test.com",
+      password: sha256("Passord01"),
+      role: Role.MONTEUR,
+    },
+  });
+
+  const customer = await prisma.users.create({
+    data: {
+      firstname: "Walter",
+      lastname: "White",
+      email: "walter@test.com",
+      password: sha256("Passord01"),
+      role: Role.CUSTOMER,
+    },
+  });
+
+  console.log(`${sales.firstname} has been successfully created`);
+  console.log(`${monteur.firstname} has been successfully created`);
+  console.log(`${customer.firstname} has been successfully created`);
+}
+
 // function for encrypting password (message)
 function sha256(message) {
   return crypto.createHash("sha256").update(message).digest("hex").toString();
 }
 
-const pageroutes = {
-  admin: (req, res) => {
-    res.sendFile(__dirname + "/pages/admin/index.html");
-  },
-  login: (req, res) => {
-    res.sendFile(__dirname + "/pages/login.html");
-  },
-};
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/pages/login.html");
+});
 
-// auto gets pages from page array
+// auto gets pages
 app.get("/:page", (req, res) => {
   const page = req.params.page;
-  pageroutes[page](req, res);
+
+  function Router(page) {
+    res.sendFile(__dirname + `/pages/${page}.html`);
+  }
+  Router(page, req, res); // calls the function using the page from req params
 });
 
 // sets up port
