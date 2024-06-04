@@ -10,8 +10,22 @@ async function createAdmin() {
   const admin = await prisma.users.create({
     data: {
       firstname: "admin",
-      lastname: "admin",
+      lastname: "user",
       email: "admin@test.com",
+      password: sha256("Passord01"),
+      role: Role.ADMIN,
+    },
+  });
+
+  console.log(`${admin.firstname} has been created`);
+}
+
+async function createUsers() {
+  const admin = await prisma.users.create({
+    data: {
+      firstname: "tuco",
+      lastname: "salamanca",
+      email: "tuco@test.com",
       password: sha256("Passord01"),
       role: Role.ADMIN,
       articles: {
@@ -22,41 +36,50 @@ async function createAdmin() {
       },
     },
   });
-
-  console.log(`${admin.firstname} has been created`);
-}
-
-async function createUsers() {
+  
   const sales = await prisma.users.create({
     data: {
-      firstname: "Saul",
-      lastname: "Goodman",
+      firstname: "saul",
+      lastname: "goodman",
       email: "saul@test.com",
       password: sha256("Passord01"),
       role: Role.SALES,
+      articles: {
+        create: {
+          title: "SALES ARTICLE",
+          content: "This is a test article",
+        },
+      },
     },
   });
 
   const monteur = await prisma.users.create({
     data: {
-      firstname: "Jesse",
-      lastname: "Pinkman",
+      firstname: "jesse",
+      lastname: "pinkman",
       email: "jesse@test.com",
       password: sha256("Passord01"),
       role: Role.MONTEUR,
-    },
+      articles: {
+        create: {
+          title: "MONTEUR ARTICLE",
+          content: "This is a test article",
+        },
+      },
+    }
   });
 
   const customer = await prisma.users.create({
     data: {
-      firstname: "Walter",
-      lastname: "White",
+      firstname: "walter",
+      lastname: "white",
       email: "walter@test.com",
       password: sha256("Passord01"),
       role: Role.CUSTOMER,
     },
   });
 
+  console.log(`${admin.firstname} has been created`);
   console.log(`${sales.firstname} has been successfully created`);
   console.log(`${monteur.firstname} has been successfully created`);
   console.log(`${customer.firstname} has been successfully created`);
@@ -70,7 +93,6 @@ function sha256(message) {
 // Middleware
 app.use(express.json());
 app.use(cookieparser());
-app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(join(__dirname, "css")));
 app.use(express.static(join(__dirname, "pages")));
@@ -88,7 +110,7 @@ app.post("/login", async (req, res) => {
 
   if (userInfo) {
     // Generate a new token
-    const token = crypto.randomBytes(64).toString('hex');
+    const token = crypto.randomBytes(64).toString("hex");
 
     // Update the user record with the new token
     await prisma.users.update({
@@ -101,8 +123,8 @@ app.post("/login", async (req, res) => {
     });
 
     // Set the new token as a cookie
-    res.cookie("token", token, {maxAge: 1000 * 60 * 60 * 24 });
-    res.redirect("/dashboard")
+    res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 });
+    res.redirect("/dashboard");
   } else {
     res.redirect("/");
   }
@@ -123,14 +145,18 @@ app.get("/dashboard", async (req, res) => {
 
   const role = user.role;
 
-  console.log(user)
-
   res.sendFile(__dirname + `/pages/dashboard/${role}.html`);
 });
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/pages/login.html");
 });
+
+app.get("/api/articles", async (req, res) => {
+  const articles = await prisma.article.findMany();
+
+  res.json(articles)
+})
 
 // sets up port
 app.listen(3000, () => {

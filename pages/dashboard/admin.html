@@ -4,22 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/global.css" />
-    <link rel="stylesheet" href="/admin.css">
+    <link rel="stylesheet" href="/dashboard.css" />
     <title>Admin page</title>
-
     <script defer>
+      const fetchArtikler = async () => {
+        const res = await fetch("http://localhost:3000/api/articles");
+        const data = await res.json();
 
+        console.log(data);
+      };
+
+      fetchArtikler()
     </script>
   </head>
   <body>
     <main>
       <aside>
-       <p>Hey there, {{user.firstname}}!</p>
-       <a href="/"></a>
+        <p>Hey there, ADMIN</p>
       </aside>
-      <section>
-
-      </section>
+      <section></section>
     </main>
   </body>
 </html>
