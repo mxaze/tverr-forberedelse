@@ -26,7 +26,7 @@ async function createUsers() {
       firstname: "tuco",
       lastname: "salamanca",
       email: "tuco@test.com",
-      password: sha256("Passord01"),
+      password: sha256("admin"),
       role: Role.ADMIN
     },
   });
@@ -36,7 +36,7 @@ async function createUsers() {
       firstname: "saul",
       lastname: "goodman",
       email: "saul@test.com",
-      password: sha256("Passord01"),
+      password: sha256("sales"),
       role: Role.SALES
     },
   });
@@ -46,7 +46,7 @@ async function createUsers() {
       firstname: "jesse",
       lastname: "pinkman",
       email: "jesse@test.com",
-      password: sha256("Passord01"),
+      password: sha256("monteur"),
       role: Role.MONTEUR
     }
   });
@@ -56,7 +56,7 @@ async function createUsers() {
       firstname: "walter",
       lastname: "white",
       email: "walter@test.com",
-      password: sha256("Passord01"),
+      password: sha256("customer"),
       role: Role.CUSTOMER,
     },
   });
@@ -66,6 +66,7 @@ async function createUsers() {
   console.log(`${monteur.firstname} has been successfully created`);
   console.log(`${customer.firstname} has been successfully created`);
 }
+// write createUsers() under to create users when you want to create them.
 
 // function for creating articles, just write createArticles() under
 async function createArticles() {
@@ -95,6 +96,8 @@ async function createArticles() {
   console.log(`${monteurArticle.title} has been created`);
 }
 
+// write createArticles() under to create articles when you want to create them.
+
 // function for encrypting password (message)
 function sha256(message) {
   return crypto.createHash("sha256").update(message).digest("hex").toString();
@@ -108,8 +111,12 @@ app.use(express.static(join(__dirname, "css")));
 app.use(express.static(join(__dirname, "pages")));
 
 // login post
+// login post
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
+  // Clear the id
+  res.clearCookie("id");
 
   const userInfo = await prisma.users.findFirst({
     where: {
@@ -118,45 +125,62 @@ app.post("/login", async (req, res) => {
     },
   });
 
+  // if there is userinformation (account actually exists in database)
   if (userInfo) {
-    // Generate a new token
-    const token = crypto.randomBytes(64).toString("hex");
+    // Set the user's id as a cookie
+    res.cookie("id", userInfo.id.toString());
 
-    // Update the user record with the new token
-    await prisma.users.update({
-      where: {
-        id: userInfo.id,
-      },
-      data: {
-        token: token,
-      },
-    });
-
-    // Set the new token as a cookie
-    res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 });
+    // Redirect the user to the dashboard page that corresponds to their role
     res.redirect("/dashboard");
   } else {
+    // If the user is not found, redirect back to the login page
     res.redirect("/");
   }
 });
 
-// gets dashboard and sends user the right dashboard based on role
 app.get("/dashboard", async (req, res) => {
-  const token = req.cookies.token;
+  const id = parseInt(req.cookies.id); // gets the id from the cookie
 
-  const user = await prisma.users.findFirst({
+  const user = await prisma.users.findFirst({ // gets the user by the id
     where: {
-      token: token,
+      id: id,
     },
   });
 
+  // If the user is not found, redirect to the login page
   if (!user) {
     return res.redirect("/");
   }
 
-  const role = user.role;
+  // Redirect the user to the dashboard page that corresponds to their role
+  switch (user.role) {
+    case Role.ADMIN:
+      return res.redirect("/dashboard/admin");
+    case Role.SALES:
+      return res.redirect("/dashboard/sales");
+    case Role.MONTEUR:
+      return res.redirect("/dashboard/monteur");
+    case Role.CUSTOMER:
+      return res.redirect("/dashboard/customer");
+    default:
+      return res.redirect("/");
+  }
+});
 
-  res.sendFile(__dirname + `/pages/dashboard/${role}.html`);
+app.get("/dashboard/admin", (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/admin.html");
+});
+
+app.get("/dashboard/sales", (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/sales.html");
+});
+
+app.get("/dashboard/monteur", (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/monteur.html");
+});
+
+app.get("/dashboard/customer", (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/customer.html");
 });
 
 // gets index and sends login
@@ -166,9 +190,9 @@ app.get("/", (req, res) => {
 
 // gets articles
 app.get("/api/articles", async (req, res) => {
-  const articles = await prisma.article.findMany();
+  const articles = await prisma.article.findMany(); // finds all articles in the database
 
-  res.json(articles)
+  res.json(articles) // sends the articles as json
 })
 
 //get article by id
