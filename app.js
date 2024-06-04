@@ -18,17 +18,16 @@ app.use(express.static(join(__dirname, "pages")));
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const userData = await prisma.users.findFirst({
+  const userInfo = await prisma.users.findFirst({
     where: {
       email: email,
       password: sha256(password),
     },
   });
 
-  if (userData) {
-    res.cookie("token", userData.token);
-    const role = userData.role;
-    res.redirect(`/${role}`);
+  if (userInfo) {
+    res.cookie("token", userInfo.token, {maxAge: 1000 * 60 * 60 * 24 });
+    res.redirect("/dashboard")
   } else {
     res.redirect("/");
   }
@@ -95,18 +94,25 @@ function sha256(message) {
   return crypto.createHash("sha256").update(message).digest("hex").toString();
 }
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/pages/login.html");
+app.get("/dashboard", async (req, res) => {
+  const token = req.cookies.token;
+
+  const user = await prisma.users.findFirst({
+    where: {
+      token: token,
+    },
+  });
+
+  if (!user) {
+    return res.redirect("/");
+  }
+
+  const role = user.role;
+  res.sendFile(__dirname + `/pages/dashboard/${role}.html`);
 });
 
-// auto gets pages
-app.get("/:page", (req, res) => {
-  const page = req.params.page;
-
-  function Router(page) {
-    res.sendFile(__dirname + `/pages/${page}.html`);
-  }
-  Router(page, req, res); // calls the function using the page from req params
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/pages/login.html");
 });
 
 // sets up port

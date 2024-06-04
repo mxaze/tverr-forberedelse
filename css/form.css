@@ -7,6 +7,8 @@ body {
 
 h1 {
     color: #fff;
+    text-transform: uppercase;
+    font-weight: 700;
 }
 
 form {
@@ -51,5 +53,5 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
     cursor: pointer;
-    filter: drop-shadow(1px 1px 10px rgb(0, 0 ,0));
+    font-weight: bold;
 }
