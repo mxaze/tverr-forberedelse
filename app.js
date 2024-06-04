@@ -6,33 +6,6 @@ const cookieparser = require("cookie-parser");
 const crypto = require("crypto");
 const { join } = require("path");
 
-app.use(express.json());
-app.use(cookieparser());
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: false }));
-
-// does so that you can access the pages folder iwth pages and css folder with css
-app.use(express.static(join(__dirname, "css")));
-app.use(express.static(join(__dirname, "pages")));
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  const userInfo = await prisma.users.findFirst({
-    where: {
-      email: email,
-      password: sha256(password),
-    },
-  });
-
-  if (userInfo) {
-    res.cookie("token", userInfo.token, {maxAge: 1000 * 60 * 60 * 24 });
-    res.redirect("/dashboard")
-  } else {
-    res.redirect("/");
-  }
-});
-
 async function createAdmin() {
   const admin = await prisma.users.create({
     data: {
@@ -94,6 +67,47 @@ function sha256(message) {
   return crypto.createHash("sha256").update(message).digest("hex").toString();
 }
 
+// Middleware
+app.use(express.json());
+app.use(cookieparser());
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static(join(__dirname, "css")));
+app.use(express.static(join(__dirname, "pages")));
+
+// login post
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const userInfo = await prisma.users.findFirst({
+    where: {
+      email: email,
+      password: sha256(password),
+    },
+  });
+
+  if (userInfo) {
+    // Generate a new token
+    const token = crypto.randomBytes(64).toString('hex');
+
+    // Update the user record with the new token
+    await prisma.users.update({
+      where: {
+        id: userInfo.id,
+      },
+      data: {
+        token: token,
+      },
+    });
+
+    // Set the new token as a cookie
+    res.cookie("token", token, {maxAge: 1000 * 60 * 60 * 24 });
+    res.redirect("/dashboard")
+  } else {
+    res.redirect("/");
+  }
+});
+
 app.get("/dashboard", async (req, res) => {
   const token = req.cookies.token;
 
@@ -108,6 +122,9 @@ app.get("/dashboard", async (req, res) => {
   }
 
   const role = user.role;
+
+  console.log(user)
+
   res.sendFile(__dirname + `/pages/dashboard/${role}.html`);
 });
 
