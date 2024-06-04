@@ -27,29 +27,17 @@ async function createUsers() {
       lastname: "salamanca",
       email: "tuco@test.com",
       password: sha256("Passord01"),
-      role: Role.ADMIN,
-      articles: {
-        create: {
-          title: "Hello world",
-          content: "This is a test article",
-        },
-      },
+      role: Role.ADMIN
     },
   });
-  
+
   const sales = await prisma.users.create({
     data: {
       firstname: "saul",
       lastname: "goodman",
       email: "saul@test.com",
       password: sha256("Passord01"),
-      role: Role.SALES,
-      articles: {
-        create: {
-          title: "SALES ARTICLE",
-          content: "This is a test article",
-        },
-      },
+      role: Role.SALES
     },
   });
 
@@ -59,13 +47,7 @@ async function createUsers() {
       lastname: "pinkman",
       email: "jesse@test.com",
       password: sha256("Passord01"),
-      role: Role.MONTEUR,
-      articles: {
-        create: {
-          title: "MONTEUR ARTICLE",
-          content: "This is a test article",
-        },
-      },
+      role: Role.MONTEUR
     }
   });
 
@@ -83,6 +65,34 @@ async function createUsers() {
   console.log(`${sales.firstname} has been successfully created`);
   console.log(`${monteur.firstname} has been successfully created`);
   console.log(`${customer.firstname} has been successfully created`);
+}
+
+// function for creating articles, just write createArticles() under
+async function createArticles() {
+  const adminArticle = await prisma.article.create({
+    data: {
+      title: "Nyeste solcellepaneler!",
+      content: "This is article made by admin blabla",
+    }
+  });
+
+  const salesArticle = await prisma.article.create({
+    data: {
+      title: "Sales solcellepaneler!",
+      content: "Artikkel lagd av salgsavdelingen",
+    }
+  });
+
+  const monteurArticle = await prisma.article.create({
+    data: {
+      title: "Monterings artikkel",
+      content: "Les hvordan vi monterte alt!",
+    }
+  });
+
+  console.log(`${adminArticle.title} has been created`);
+  console.log(`${salesArticle.title} has been created`);
+  console.log(`${monteurArticle.title} has been created`);
 }
 
 // function for encrypting password (message)
@@ -130,6 +140,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// gets dashboard and sends user the right dashboard based on role
 app.get("/dashboard", async (req, res) => {
   const token = req.cookies.token;
 
@@ -148,15 +159,57 @@ app.get("/dashboard", async (req, res) => {
   res.sendFile(__dirname + `/pages/dashboard/${role}.html`);
 });
 
+// gets index and sends login
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/pages/login.html");
 });
 
+// gets articles
 app.get("/api/articles", async (req, res) => {
   const articles = await prisma.article.findMany();
 
   res.json(articles)
 })
+
+//get article by id
+app.get("/api/article/:id", async (req, res) => {
+  const article = await prisma.article.findFirst({
+    where: {
+      id: parseInt(req.params.id)
+    }
+  });
+
+  res.json(article);
+});
+
+// sends create article page
+app.get("/dashboard/article/create", async (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/article/create.html");
+});
+
+// sends edit article page
+app.get("/dashboard/article/:id", async (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/article/id.html");
+});
+
+// logs out by clearing cookie and redirecting to login
+app.post("/logout", async (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
+});
+
+app.post("/createArticle", async (req, res) => {
+  const { title, content } = req.body;
+
+  const article = await prisma.article.create({
+    data: {
+      title: title,
+      content: content,
+    },
+  });
+
+  res.redirect("/dashboard");
+});
 
 // sets up port
 app.listen(3000, () => {

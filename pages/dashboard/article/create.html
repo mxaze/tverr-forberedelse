@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/article.css">
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="/dashboard.css">
+    <title>Create article</title>
+</head>
+<body>
+    <div class="logout">
+        <a href="/dashboard">Return</a>
+    </div>
+    <article>
+        <form action="/createArticle" method="POST">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title">
+            <!-- 
+                <label for="Author">Author</label>
+                <input type="text" name="author"> 
+            -->
+            <label for="content">Content</label>
+            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+            <input type="submit" value="Create article">
+        </form>
+    </article>
+</body>
+</html>

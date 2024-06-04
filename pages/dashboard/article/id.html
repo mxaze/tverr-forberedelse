@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/article.css" />
+    <title>Article</title>
+
+    <script defer>
+      const fetchArticle = async () => {
+        const url = window.location.pathname;
+        const id = url.split("/").pop();
+        const response = await fetch(`/api/article/${id}`);
+        const data = await response.json();
+        document.querySelector("h1").textContent = data.title;
+        document.querySelector("p").textContent = data.content;
+      };
+
+      fetchArticle();
+    </script>
+  </head>
+  <body>
+    <div class="logout">
+        <a href="/dashboard">Return</a>
+    </div>
+    <article>
+      <h1></h1>
+      <p></p>
+    </article>
+  </body>
+</html>

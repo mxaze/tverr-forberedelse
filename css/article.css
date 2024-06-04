@@ -1,0 +1,56 @@
+article {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1rem;
+    width: 100%;
+    height: 100vh;
+    padding: 1rem;
+    background-color: #333;
+    color: #fff;
+}
+
+article h1 {
+    text-align: center;
+    padding-top: 1rem;
+    font-weight: 700;
+}
+
+article p {
+    color: #fff;
+    text-align: center;
+}
+
+article form {
+    padding-top: 5rem;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    text-align: center;
+}
+
+article form input {
+    background-color: transparent;
+    padding: 1rem;
+    margin: 1rem;
+    border: 1px solid #fff;
+    border-radius: 1rem;
+    color: #fff;
+    text-align: center;
+}
+
+article form input:hover, article form textarea:hover{
+    cursor: pointer;
+    background-color: #222;
+}
+
+article form textarea {
+    background-color: transparent;
+    padding: 1rem;
+    margin: 1rem;
+    border: 1px solid #fff;
+    border-radius: 1rem;
+    color: #fff;
+    text-align: center;
+}

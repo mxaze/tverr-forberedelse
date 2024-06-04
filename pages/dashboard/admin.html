@@ -5,22 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/global.css" />
     <link rel="stylesheet" href="/dashboard.css" />
-    <title>Admin page</title>
+    <title>Admin dashboard</title>
     <script defer>
       const fetchArtikler = async () => {
         const res = await fetch("http://localhost:3000/api/articles");
         const data = await res.json();
 
-        console.log(data);
+        const section = document.querySelector("section");
+
+        data.forEach((article) => {
+          const articleElement = document.createElement("article");
+          articleElement.innerHTML = `
+            <a href="/dashboard/article/${article.id}">${article.title}</a>
+          `;
+
+          section.appendChild(articleElement);
+        });
       };
 
       fetchArtikler()
     </script>
   </head>
   <body>
+    <div class="logout">
+      <form action="/logout" method="POST">
+        <input type="submit" value="LOGOUT">
+      </form>
+    </div>
     <main>
       <aside>
-        <p>Hey there, ADMIN</p>
+        <p>Hey there, <span>ADMIN</span></p>
+        <a href="/dashboard/article/create">Create article</a>
       </aside>
       <section></section>
     </main>
