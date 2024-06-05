@@ -12,24 +12,28 @@
       const fetchArticle = async () => {
         const url = window.location.pathname;
         const id = url.split("/").pop();
-        const response = await fetch(`/api/article/${id}`);
+        const response = await fetch(`/api/articleEdit/${id}`);
         const data = await response.json();
-        document.querySelector("h1").textContent = data.title;
-        document.querySelector("h2").textContent = `antall visninger: ${data.views}`
-        document.querySelector("p").textContent = data.content;
+        document.querySelector("#title").value = data.title;
+        document.querySelector("#content").value = data.content;
+        document.querySelector("#id").value = data.id;
       };
-
       fetchArticle();
     </script>
   </head>
   <body>
     <div class="logout">
-        <a href="/dashboard">Return</a>
+      <a href="/dashboard">Return</a>
     </div>
     <article>
-      <h1></h1>
-      <h2></h2>
-      <p></p>
+      <form action="/editArticle" method="POST">
+        <input type="text" id="id" name="id" hidden>
+        <h1>Edit TITLE</h1>
+        <input id="title" type="text" name="title" />
+        <h1>EDIT CONTENT:</h1>
+        <textarea id="content" name="content"></textarea>
+        <input type="submit" />
+      </form>
     </article>
   </body>
 </html>

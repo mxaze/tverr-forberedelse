@@ -1,3 +1,4 @@
+
 const { PrismaClient, Role } = require("@prisma/client");
 const express = require("express");
 const app = express();
@@ -95,7 +96,6 @@ async function createArticles() {
   console.log(`${salesArticle.title} has been created`);
   console.log(`${monteurArticle.title} has been created`);
 }
-
 // write createArticles() under to create articles when you want to create them.
 
 // function for encrypting password (message)
@@ -110,6 +110,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(join(__dirname, "css")));
 app.use(express.static(join(__dirname, "pages")));
 
+// login post
 // login post
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -205,7 +206,6 @@ app.get("/api/article/:id", async (req, res) => {
   res.json(article);
 });
 
-
 // sends create article page
 app.get("/dashboard/article/create", async (req, res) => {
   res.sendFile(__dirname + "/pages/dashboard/article/create.html");
@@ -213,7 +213,22 @@ app.get("/dashboard/article/create", async (req, res) => {
 
 // sends edit article page
 app.get("/dashboard/article/:id", async (req, res) => {
-  res.sendFile(__dirname + "/pages/dashboard/article/id.html");
+  const addView = await prisma.article.update({
+    where: {
+      id: parseInt(req.params.id),
+    },
+    data: {
+      views: {
+        increment: 1,
+      },
+    },
+  });
+
+  if (addView) {
+    res.sendFile(__dirname + "/pages/dashboard/article/id.html");
+  } else {
+    res.redirect("/dashboard");
+  }
 });
 
 // logs out by clearing cookie and redirecting to login
@@ -222,11 +237,82 @@ app.post("/logout", async (req, res) => {
   res.redirect("/");
 });
 
-
 app.post("/createArticle", async (req, res) => {
   const { title, content } = req.body;
 
   const article = await prisma.article.create({
+    data: {
+      title: title,
+      content: content,
+    },
+  });
+
+  res.redirect("/dashboard");
+});
+
+app.get("/dashboard/article/delete/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  await prisma.article.delete({
+    where: {
+      id: id,
+    },
+
+  });
+
+  res.redirect("/dashboard");
+});
+
+app.get("/dashboard/article/edit/:id", async (req, res) => {
+  res.sendFile(__dirname + "/pages/dashboard/article/edit.html");
+});
+
+app.get("/api/articleEdit/:id", async (req, res) => {
+  const article = await prisma.article.findFirst({
+    where: {
+      id: parseInt(req.params.id),
+    },
+  });
+
+  res.json(article);
+});
+
+app.get("/api/articles/search", async (req, res) => {
+  const searchTerm = req.query.q;
+
+  const article = await prisma.article.findFirst({
+    where: {
+      OR: [
+        {
+          title: {
+            contains: searchTerm,
+            mode: "insensitive", // case insensitive
+          },
+        },
+        {
+          content: {
+            contains: searchTerm,
+            mode: "insensitive", // case insensitive
+          },
+        },
+      ],
+    },
+  });
+
+  if (article) {
+    res.redirect(`/dashboard/article/${article.id}`);
+  } else {
+    res.send('No articles found');
+  }
+});
+
+app.post("/editArticle", async (req, res) => {
+  const { id, title, content } = req.body;
+
+  await prisma.article.update({
+    where: {
+      id: parseInt(id),
+    },
     data: {
       title: title,
       content: content,
