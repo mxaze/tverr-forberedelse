@@ -206,6 +206,7 @@ app.get("/api/article/:id", async (req, res) => {
   res.json(article);
 });
 
+
 // sends create article page
 app.get("/dashboard/article/create", async (req, res) => {
   res.sendFile(__dirname + "/pages/dashboard/article/create.html");
@@ -221,6 +222,7 @@ app.post("/logout", async (req, res) => {
   res.clearCookie("token");
   res.redirect("/");
 });
+
 
 app.post("/createArticle", async (req, res) => {
   const { title, content } = req.body;
