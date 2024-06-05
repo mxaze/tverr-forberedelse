@@ -111,7 +111,6 @@ app.use(express.static(join(__dirname, "css")));
 app.use(express.static(join(__dirname, "pages")));
 
 // login post
-// login post
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
