@@ -18,6 +18,17 @@
         document.querySelector("p").textContent = data.content;
       };
 
+      const createRow = (user, bodyId, editUrl) => {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn btn-danger";
+    deleteButton.innerText = "🗑️";
+    deleteButton.addEventListener("click", () => {
+        deleteArticle(user.id);
+    });
+    tr.appendChild(deleteButton);
+    
+};
+
     
 
 
